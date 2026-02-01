@@ -1,0 +1,24 @@
+{
+  "business_types": [
+    {
+      "id": 1,
+      "type": "B2B",
+      "description": "Business to Business"
+    },
+    {
+      "id": 2,
+      "type": "B2C",
+      "description": "Business to Consumer"
+    },
+    {
+      "id": 3,
+      "type": "B2G",
+      "description": "Business to Government"
+    },
+    {
+      "id": 4,
+      "type": "C2C",
+      "description": "Consumer to Consumer"
+    }
+  ]
+}

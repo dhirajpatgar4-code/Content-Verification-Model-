@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Verification Dashboard</h1>
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Verifications</h3>
+                <p id="totalCount">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Verified Content</h3>
+                <p id="verifiedCount">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>Failed Content</h3>
+                <p id="failedCount">0</p>
+            </div>
+        </div>
+        <div id="chartContainer"></div>
+    </div>
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>

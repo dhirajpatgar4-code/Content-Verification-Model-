@@ -1,0 +1,4 @@
+product_id,product_name,description,category,verified
+1,Product A,High quality product for business use,Business,true
+2,Product B,Educational tool for online learning,Education,true
+3,Product C,Health monitoring device,Healthcare,true

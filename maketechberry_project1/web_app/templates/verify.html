@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Content</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Verify Your Content</h1>
+        <form id="verificationForm">
+            <input type="text" placeholder="Enter text content" id="textInput">
+            <input type="file" id="imageInput" accept="image/*">
+            <button type="submit">Verify</button>
+        </form>
+        <div id="results"></div>
+    </div>
+    <script src="{{ url_for('static', filename='js/verify.js') }}"></script>
+</body>
+</html>

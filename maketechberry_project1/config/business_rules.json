@@ -1,0 +1,55 @@
+{
+  "restricted_categories": [
+    "weapons",
+    "drugs",
+    "adult_content",
+    "gambling",
+    "explosives",
+    "poisons",
+    "counterfeit",
+    "human_organs",
+    "surveillance_devices",
+    "live_animals"
+  ],
+  "confidence_thresholds": {
+    "high": 0.8,
+    "medium": 0.6,
+    "low": 0.4
+  },
+  "domain_thresholds": {
+    "strict": 0.7,
+    "moderate": 0.5,
+    "lenient": 0.3
+  },
+  "related_domains": {
+    "education": [
+      "tech",
+      "sports",
+      "health"
+    ],
+    "sports": [
+      "health",
+      "education"
+    ],
+    "health": [
+      "sports",
+      "education"
+    ],
+    "tech": [
+      "education",
+      "electronics"
+    ],
+    "fashion": [
+      "beauty",
+      "home"
+    ],
+    "travel": [
+      "entertainment",
+      "home"
+    ],
+    "real_estate": [
+      "home",
+      "finance"
+    ]
+  }
+}

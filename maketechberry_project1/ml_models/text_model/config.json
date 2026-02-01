@@ -1,0 +1,7 @@
+{
+  "model_type": "BERT",
+  "version": "1.0",
+  "input_shape": null,
+  "output_classes": 2,
+  "max_length": 512
+}

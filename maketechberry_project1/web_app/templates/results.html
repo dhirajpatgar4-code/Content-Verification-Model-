@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Verification Results</h1>
+        <div id="resultsContainer" class="results">
+            <div class="result-card">
+                <h3>Content Status</h3>
+                <p id="status">Processing...</p>
+            </div>
+            <div class="result-card">
+                <h3>Confidence Score</h3>
+                <p id="confidence">0%</p>
+            </div>
+            <div class="result-card">
+                <h3>Details</h3>
+                <p id="details">Loading details...</p>
+            </div>
+        </div>
+        <a href="{{ url_for('verify') }}">Back to Verification</a>
+    </div>
+    <script src="{{ url_for('static', filename='js/results.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "categories": [
+    {
+      "id": 1,
+      "name": "Business",
+      "description": "Business and commerce related content"
+    },
+    {
+      "id": 2,
+      "name": "Education",
+      "description": "Educational content"
+    },
+    {
+      "id": 3,
+      "name": "Healthcare",
+      "description": "Healthcare related content"
+    },
+    {
+      "id": 4,
+      "name": "Technology",
+      "description": "Technology and IT content"
+    }
+  ]
+}
