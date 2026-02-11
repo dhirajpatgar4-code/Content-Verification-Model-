@@ -3,19 +3,330 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verify Content</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Verify Content - Content Verification System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .form-section {
+            display: none;
+        }
+        .card {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: none;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .preview-image {
+            max-height: 200px;
+            object-fit: contain;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Verify Your Content</h1>
-        <form id="verificationForm">
-            <input type="text" placeholder="Enter text content" id="textInput">
-            <input type="file" id="imageInput" accept="image/*">
-            <button type="submit">Verify</button>
-        </form>
-        <div id="results"></div>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt"></i> Content Verification System
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/verify">Verify Content</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0"><i class="fas fa-search"></i> Verify Your Content</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="verificationForm" method="POST" enctype="multipart/form-data">
+                            <!-- Business Info -->
+                            <div class="mb-4">
+                                <h5><i class="fas fa-building"></i> Business Information</h5>
+                                <div class="mb-3">
+                                    <label for="business_id" class="form-label">Business ID *</label>
+                                    <input type="text" class="form-control" id="business_id" name="business_id" 
+                                           placeholder="e.g., EDU001, SPORTS001, MARKET001" required>
+                                    <small class="text-muted">From your Problem Statement 4 registration</small>
+                                </div>
+                                
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> 
+                                    <strong>Available Business IDs:</strong>
+                                    <ul class="mb-0 mt-2">
+                                        <li><strong>EDU001</strong> - Education Business (allowed: education, sports, health)</li>
+                                        <li><strong>SPORTS001</strong> - Sports Business (allowed: sports, health)</li>
+                                        <li><strong>MARKET001</strong> - Marketplace (allowed: education, sports, tech, fashion)</li>
+                                        <li><strong>FOOD001</strong> - Food Business (allowed: food only)</li>
+                                        <li><strong>TECH001</strong> - Tech Business (allowed: tech, education)</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <!-- Content Type -->
+                            <div class="mb-4">
+                                <h5><i class="fas fa-file-alt"></i> Content Type</h5>
+                                <div class="mb-3">
+                                    <label for="content_type" class="form-label">Select Content Type *</label>
+                                    <select class="form-select" id="content_type" name="content_type" required>
+                                        <option value="">Choose content type...</option>
+                                        <option value="text">Text Only</option>
+                                        <option value="image">Image Only</option>
+                                        <option value="mixed">Text + Image (Mixed)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Text Content Section -->
+                            <div class="mb-4 form-section" id="textSection">
+                                <h5><i class="fas fa-font"></i> Text Content</h5>
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Title (Optional)</label>
+                                    <input type="text" class="form-control" id="title" name="title" 
+                                           placeholder="Enter content title">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description *</label>
+                                    <textarea class="form-control" id="description" name="description" 
+                                              rows="5" placeholder="Enter your content here..." required></textarea>
+                                    <small class="text-muted">Enter the text content you want to verify</small>
+                                </div>
+                            </div>
+
+                            <!-- Image Content Section -->
+                            <div class="mb-4 form-section" id="imageSection">
+                                <h5><i class="fas fa-image"></i> Image Content</h5>
+                                <div class="mb-3">
+                                    <label for="image" class="form-label">Upload Image</label>
+                                    <input type="file" class="form-control" id="image" name="image" 
+                                           accept="image/*">
+                                    <small class="text-muted">Supported formats: JPG, PNG, GIF (Max: 10MB)</small>
+                                </div>
+                                <div class="mb-3">
+                                    <div id="imagePreview" class="text-center"></div>
+                                </div>
+                            </div>
+
+                            <!-- Examples -->
+                            <div class="mb-4">
+                                <h5><i class="fas fa-lightbulb"></i> Example Content</h5>
+                                <div class="accordion" id="examplesAccordion">
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#example1">
+                                                ✅ Education Example (EDU001)
+                                            </button>
+                                        </h2>
+                                        <div id="example1" class="accordion-collapse collapse" data-bs-parent="#examplesAccordion">
+                                            <div class="accordion-body">
+                                                <strong>Business ID:</strong> EDU001<br>
+                                                <strong>Text:</strong> "Physics lab experiments manual for grade 12 students"<br>
+                                                <strong>Expected Result:</strong> ✅ APPROVED (Education domain)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#example2">
+                                                ❌ Restricted Example
+                                            </button>
+                                        </h2>
+                                        <div id="example2" class="accordion-collapse collapse" data-bs-parent="#examplesAccordion">
+                                            <div class="accordion-body">
+                                                <strong>Business ID:</strong> EDU001<br>
+                                                <strong>Text:</strong> "Buy guns and firearms online"<br>
+                                                <strong>Expected Result:</strong> ❌ BLOCKED (Weapons - restricted)
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#example3">
+                                                ⚠️ Domain Mismatch
+                                            </button>
+                                        </h2>
+                                        <div id="example3" class="accordion-collapse collapse" data-bs-parent="#examplesAccordion">
+                                            <div class="accordion-body">
+                                                <strong>Business ID:</strong> FOOD001<br>
+                                                <strong>Text:</strong> "Real estate properties for sale"<br>
+                                                <strong>Expected Result:</strong> ❌ BLOCKED (Wrong domain)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-check-circle"></i> Verify Content
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="window.location.href='/'">
+                                    <i class="fas fa-home"></i> Back to Home
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Quick Test Buttons -->
+                <div class="card mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-bolt"></i> Quick Tests</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">Test common scenarios with one click:</p>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-success w-100" onclick="loadExample('edu')">
+                                    <i class="fas fa-graduation-cap"></i> Education Test
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-danger w-100" onclick="loadExample('weapons')">
+                                    <i class="fas fa-ban"></i> Weapons Test
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-warning w-100" onclick="loadExample('mismatch')">
+                                    <i class="fas fa-exclamation-triangle"></i> Domain Mismatch
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <script src="{{ url_for('static', filename='js/verify.js') }}"></script>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container text-center">
+            <p class="mb-0">© 2024 Content Verification System | ML-Powered Content Safety</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Show/hide form sections based on content type
+        document.getElementById('content_type').addEventListener('change', function() {
+            const type = this.value;
+            
+            // Hide all sections first
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show relevant sections
+            if (type === 'text' || type === 'mixed') {
+                document.getElementById('textSection').style.display = 'block';
+                document.getElementById('description').required = true;
+            }
+            
+            if (type === 'image' || type === 'mixed') {
+                document.getElementById('imageSection').style.display = 'block';
+            }
+        });
+
+        // Image preview
+        document.getElementById('image')?.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            
+            if (file) {
+                if (!file.type.match('image.*')) {
+                    alert('Please select an image file');
+                    this.value = '';
+                    preview.innerHTML = '';
+                    return;
+                }
+                
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('Image size must be less than 10MB');
+                    this.value = '';
+                    preview.innerHTML = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `
+                        <div class="border rounded p-2">
+                            <img src="${e.target.result}" class="img-fluid preview-image">
+                            <div class="mt-2 small text-muted">
+                                ${file.name} (${(file.size / 1024).toFixed(1)} KB)
+                            </div>
+                        </div>
+                    `;
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.innerHTML = '';
+            }
+        });
+
+        // Quick test examples
+        function loadExample(type) {
+            const businessId = document.getElementById('business_id');
+            const contentType = document.getElementById('content_type');
+            const title = document.getElementById('title');
+            const description = document.getElementById('description');
+            
+            if (type === 'edu') {
+                businessId.value = 'EDU001';
+                contentType.value = 'text';
+                contentType.dispatchEvent(new Event('change'));
+                title.value = 'Science Education Materials';
+                description.value = 'Physics lab experiments manual for grade 12 students with step-by-step instructions and safety guidelines. Classroom activities and learning resources for teachers.';
+            } 
+            else if (type === 'weapons') {
+                businessId.value = 'EDU001';
+                contentType.value = 'text';
+                contentType.dispatchEvent(new Event('change'));
+                title.value = 'Weapons for Sale';
+                description.value = 'Buy guns and firearms online with discreet shipping. Best quality weapons available including automatic rifles and pistols. Ammunition also available.';
+            }
+            else if (type === 'mismatch') {
+                businessId.value = 'FOOD001';
+                contentType.value = 'text';
+                contentType.dispatchEvent(new Event('change'));
+                title.value = 'Real Estate Properties';
+                description.value = 'Luxury apartments for sale in prime locations with modern amenities. Real estate investment opportunities available.';
+            }
+            
+            // Scroll to form
+            document.getElementById('verificationForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Form submission
+        document.getElementById('verificationForm').addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            // Show loading state
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+            submitBtn.disabled = true;
+            
+            // Form will be submitted normally
+        });
+    </script>
 </body>
 </html>

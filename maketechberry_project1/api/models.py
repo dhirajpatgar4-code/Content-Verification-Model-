@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, ConfigDict
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
@@ -25,6 +25,8 @@ class MixedContent(BaseModel):
     business_id: Optional[str] = Field(None, max_length=50)
 
 class PredictionResult(BaseModel):
+    model_config = ConfigDict(protected_namespaces=())
+    
     category: str
     confidence: float = Field(..., ge=0.0, le=1.0)
     subcategory: Optional[str] = None

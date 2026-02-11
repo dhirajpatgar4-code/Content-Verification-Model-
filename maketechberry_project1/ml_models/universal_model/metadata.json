@@ -1,0 +1,30 @@
+{
+  "total_images": 342,
+  "domains": [
+    "education",
+    "sports",
+    "food",
+    "tech",
+    "health",
+    "weapons",
+    "drugs",
+    "adult_content",
+    "gambling",
+    "fashion",
+    "travel",
+    "entertainment",
+    "automotive",
+    "unknown"
+  ],
+  "domain_distribution": {
+    "education": 216,
+    "sports": 126
+  },
+  "training_date": "/workspaces/Content-Verification-Model-/maketechberry_project1",
+  "model_architecture": "ResNet18",
+  "input_size": [
+    3,
+    224,
+    224
+  ]
+}

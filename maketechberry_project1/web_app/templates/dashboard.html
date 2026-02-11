@@ -3,28 +3,423 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <title>Dashboard - Content Verification System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .card {
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .stat-card {
+            border-left: 4px solid;
+        }
+        .stat-approved { border-left-color: #28a745; }
+        .stat-blocked { border-left-color: #dc3545; }
+        .stat-review { border-left-color: #ffc107; }
+        .stat-total { border-left-color: #007bff; }
+        .badge {
+            font-size: 0.8em;
+            padding: 0.4em 0.8em;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Verification Dashboard</h1>
-        <div class="stats">
-            <div class="stat-card">
-                <h3>Total Verifications</h3>
-                <p id="totalCount">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>Verified Content</h3>
-                <p id="verifiedCount">0</p>
-            </div>
-            <div class="stat-card">
-                <h3>Failed Content</h3>
-                <p id="failedCount">0</p>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-shield-alt"></i> Content Verification System
+            </a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/verify">Verify Content</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">Dashboard</a>
+                    </li>
+                </ul>
             </div>
         </div>
-        <div id="chartContainer"></div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        <!-- Hidden data attributes for JavaScript -->
+        <div id="statsData" 
+             data-approved="{{ analytics.approved_count if analytics else 0 }}"
+             data-blocked="{{ analytics.blocked_count if analytics else 0 }}"
+             data-review="{{ analytics.review_count if analytics else 0 }}"
+             data-categories="{{ analytics.category_distribution|tojson if analytics else '{}' }}"
+             style="display:none;"></div>
+        
+        <div class="row">
+            <div class="col-12">
+                <h2><i class="fas fa-chart-line"></i> Analytics Dashboard</h2>
+                <p class="text-muted">Overview of content verification activities</p>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card stat-total h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Total Verifications</h5>
+                        <h2 class="card-text">{{ analytics.total_verifications if analytics else 0 }}</h2>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                <i class="fas fa-history"></i> Last 30 days
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card stat-approved h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Approved</h5>
+                        <h2 class="card-text text-success">{{ analytics.approved_count if analytics else 0 }}</h2>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                {{ analytics.approval_rate|round(1) if analytics else 0 }}% approval rate
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card stat-blocked h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Blocked</h5>
+                        <h2 class="card-text text-danger">{{ analytics.blocked_count if analytics else 0 }}</h2>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                Restricted or domain mismatch
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card stat-card stat-review h-100">
+                    <div class="card-body">
+                        <h5 class="card-title text-muted">Needs Review</h5>
+                        <h2 class="card-text text-warning">{{ analytics.review_count if analytics else 0 }}</h2>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                Low confidence content
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Decision Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="decisionChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-3">
+                <div class="card h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Category Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="categoryChart" height="250"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Verifications -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-history"></i> Recent Verifications</h5>
+                        <button class="btn btn-sm btn-outline-primary" onclick="refreshData()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        {% if recent_verifications %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Business</th>
+                                        <th>Content</th>
+                                        <th>Category</th>
+                                        <th>Confidence</th>
+                                        <th>Decision</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in recent_verifications %}
+                                    <tr>
+                                        <td><code>{{ item.verification_id[:8] }}...</code></td>
+                                        <td><span class="badge bg-info">{{ item.business_id }}</span></td>
+                                        <td>
+                                            {% if item.title %}
+                                                {{ item.title[:30] }}{% if item.title|length > 30 %}...{% endif %}
+                                            {% else %}
+                                                <span class="text-muted">No title</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if item.predicted_category in ['weapons', 'drugs', 'adult_content', 'gambling'] %}
+                                                    bg-danger
+                                                {% elif item.predicted_category == 'education' %}
+                                                    bg-success
+                                                {% elif item.predicted_category == 'sports' %}
+                                                    bg-primary
+                                                {% else %}
+                                                    bg-secondary
+                                                {% endif %}
+                                            ">
+                                                {{ item.predicted_category }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="progress" style="height: 20px;">
+                                                <div class="progress-bar 
+                                                    {% if item.confidence_score >= 0.8 %}
+                                                        bg-success
+                                                    {% elif item.confidence_score >= 0.5 %}
+                                                        bg-warning
+                                                    {% else %}
+                                                        bg-danger
+                                                    {% endif %}"
+                                                    data-width="{% if item.confidence_score %}{{ (item.confidence_score * 100)|int }}{% else %}0{% endif %}">
+                                                    {% if item.confidence_score %}{{ (item.confidence_score * 100)|int }}{% else %}0{% endif %}%
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge 
+                                                {% if item.decision == 'approved' %}
+                                                    bg-success
+                                                {% elif item.decision == 'blocked' %}
+                                                    bg-danger
+                                                {% else %}
+                                                    bg-warning
+                                                {% endif %}
+                                            ">
+                                                {{ item.decision }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {% if item.created_at %}
+                                                    {{ item.created_at[:16]|replace('T', ' ') }}
+                                                {% else %}
+                                                    N/A
+                                                {% endif %}
+                                            </small>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                            <h5>No verifications yet</h5>
+                            <p class="text-muted">Start by verifying some content!</p>
+                            <a href="/verify" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Verify Content
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mt-4">
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-bullseye text-primary"></i> Average Confidence
+                        </h5>
+                        <h2 class="card-text">
+                            {{ ((analytics.average_confidence if analytics else 0) * 100)|round(1) }}%
+                        </h2>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                Higher is better for ML accuracy
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-clock text-warning"></i> Response Time
+                        </h5>
+                        <h2 class="card-text">&lt; 500ms</h2>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                Real-time verification
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="fas fa-database text-success"></i> Data Points
+                        </h5>
+                        <h2 class="card-text">
+                            {% if analytics and analytics.category_distribution %}
+                                {{ analytics.category_distribution.values()|sum }}
+                            {% else %}
+                                0
+                            {% endif %}
+                        </h2>
+                        <p class="card-text">
+                            <small class="text-muted">
+                                Total categorized items
+                            </small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white mt-5 py-4">
+        <div class="container text-center">
+            <p class="mb-0">© 2024 Content Verification System | ML-Powered Content Safety</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Initialize charts
+        function initializeCharts() {
+            // Decision Distribution Chart
+            const decisionCtx = document.getElementById('decisionChart').getContext('2d');
+            
+            // Get data from HTML data attributes (set below)
+            const approvedCount = parseInt(document.getElementById('statsData').getAttribute('data-approved')) || 0;
+            const blockedCount = parseInt(document.getElementById('statsData').getAttribute('data-blocked')) || 0;
+            const reviewCount = parseInt(document.getElementById('statsData').getAttribute('data-review')) || 0;
+            
+            new Chart(decisionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Approved', 'Blocked', 'Needs Review'],
+                    datasets: [{
+                        data: [approvedCount, blockedCount, reviewCount],
+                        backgroundColor: ['#28a745', '#dc3545', '#ffc107'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Category Distribution Chart
+            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
+            
+            // Get category data from HTML data attribute
+            const categoriesJson = document.getElementById('statsData').getAttribute('data-categories');
+            const categories = categoriesJson ? JSON.parse(categoriesJson) : {};
+            
+            const categoryLabels = Object.keys(categories);
+            const categoryData = Object.values(categories);
+            
+            new Chart(categoryCtx, {
+                type: 'bar',
+                data: {
+                    labels: categoryLabels,
+                    datasets: [{
+                        label: 'Verifications',
+                        data: categoryData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Refresh data
+        function refreshData() {
+            location.reload();
+        }
+        // Auto-refresh every 30 seconds
+        setInterval(refreshData, 30000);
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set progress bar widths from data attributes
+            document.querySelectorAll('.progress-bar[data-width]').forEach(bar => {
+                const width = bar.getAttribute('data-width');
+                bar.style.width = width + '%';
+            });
+            
+            initializeCharts();
+        });
+    </script>
 </body>
 </html>

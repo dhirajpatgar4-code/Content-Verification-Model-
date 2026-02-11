@@ -1,0 +1,19 @@
+{
+  "total_images": 342,
+  "categories": [
+    "education",
+    "sports"
+  ],
+  "category_distribution": [
+    216,
+    126
+  ],
+  "training_date": "/workspaces/Content-Verification-Model-/maketechberry_project1",
+  "model_architecture": "ResNet18",
+  "input_size": [
+    3,
+    224,
+    224
+  ],
+  "corrupt_images_skipped": 49
+}

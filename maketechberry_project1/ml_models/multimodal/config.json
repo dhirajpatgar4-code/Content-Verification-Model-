@@ -1,0 +1,7 @@
+{
+  "model_type": "rule_based_fusion",
+  "text_model": "bert",
+  "image_model": "resnet18",
+  "version": "1.0",
+  "status": "ready"
+}

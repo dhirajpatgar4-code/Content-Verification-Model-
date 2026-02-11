@@ -75,6 +75,15 @@ class DatabaseManager:
         finally:
             session.close()
     
+    def is_valid_business_id(self, business_id):
+        """Check if business ID exists in database"""
+        session = self.Session()
+        try:
+            business = session.query(BusinessProfile).filter_by(business_id=business_id).first()
+            return business is not None
+        finally:
+            session.close()
+    
     def save_business_profile(self, business_data):
         """Save or update business profile"""
         session = self.Session()

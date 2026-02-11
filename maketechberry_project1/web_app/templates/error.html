@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Content Verification</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .error-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .error-icon {
+            font-size: 80px;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+        
+        .error-title {
+            color: #e74c3c;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .error-message {
+            color: #555;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .registered-businesses {
+            background: #f0f4ff;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: left;
+        }
+        
+        .registered-businesses h3 {
+            color: #667eea;
+            margin-top: 0;
+        }
+        
+        .business-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .business-item {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border-left: 4px solid #764ba2;
+        }
+        
+        .business-id {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .business-name {
+            color: #555;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">⚠️</div>
+        <h1 class="error-title">Verification Error</h1>
+        
+        <div class="error-message">
+            {{ error_message }}
+        </div>
+        
+        {% if registered_businesses %}
+        <div class="registered-businesses">
+            <h3>Registered Business IDs:</h3>
+            <div class="business-list">
+                <div class="business-item">
+                    <div class="business-id">EDU001</div>
+                    <div class="business-name">EduTech Academy</div>
+                </div>
+                <div class="business-item">
+                    <div class="business-id">SPORTS001</div>
+                    <div class="business-name">Sports Gear Hub</div>
+                </div>
+                <div class="business-item">
+                    <div class="business-id">FOOD001</div>
+                    <div class="business-name">Foodie Delights</div>
+                </div>
+                <div class="business-item">
+                    <div class="business-id">TECH001</div>
+                    <div class="business-name">Tech Solutions Inc</div>
+                </div>
+                <div class="business-item">
+                    <div class="business-id">MARKET001</div>
+                    <div class="business-name">MultiShop Marketplace</div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <div style="margin-top: 30px;">
+            <a href="/verify" class="btn">Go Back to Verification</a>
+            <a href="/" class="btn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); margin-left: 10px;">Go to Home</a>
+        </div>
+    </div>
+</body>
+</html>

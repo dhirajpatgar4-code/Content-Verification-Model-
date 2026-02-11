@@ -1,0 +1,9 @@
+{
+  "model_type": "resnet18",
+  "num_classes": 19,
+  "input_size": [
+    224,
+    224
+  ],
+  "status": "requires_training"
+}

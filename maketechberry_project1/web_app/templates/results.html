@@ -4,27 +4,281 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verification Results</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+        
+        .verification-id {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            display: inline-block;
+        }
+        
+        .decision-badge {
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 30px;
+        }
+        
+        .approved {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+        }
+        
+        .blocked {
+            background: linear-gradient(135deg, #f44336 0%, #c62828 100%);
+            color: white;
+        }
+        
+        .needs-review {
+            background: linear-gradient(135deg, #FF9800 0%, #EF6C00 100%);
+            color: white;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .info-card {
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .info-card h3 {
+            color: #667eea;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        
+        .info-item {
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .info-label {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .info-value {
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .confidence-bar {
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 40px;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .severity-indicator {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        
+        .severity-low {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .severity-medium {
+            background: #FF9800;
+            color: white;
+        }
+        
+        .severity-high {
+            background: #f44336;
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>Verification Results</h1>
-        <div id="resultsContainer" class="results">
-            <div class="result-card">
-                <h3>Content Status</h3>
-                <p id="status">Processing...</p>
+        <div class="header">
+            <h1>Content Verification Results</h1>
+            <p>Your content has been analyzed and verified</p>
+        </div>
+        
+        <div class="result-card">
+            <div class="verification-id">
+                Verification ID: {{ verification_id }}
             </div>
-            <div class="result-card">
-                <h3>Confidence Score</h3>
-                <p id="confidence">0%</p>
+            
+            <div class="decision-badge {{ result.decision.decision.replace('_', '-') }}">
+                {{ result.decision.decision|upper }}
             </div>
-            <div class="result-card">
-                <h3>Details</h3>
-                <p id="details">Loading details...</p>
+            
+            <div class="info-grid">
+                <!-- Prediction Details -->
+                <div class="info-card">
+                    <h3>Content Analysis</h3>
+                    <div class="info-item">
+                        <span class="info-label">Content Type:</span>
+                        <span class="info-value">{{ result.content_type|upper }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Category:</span>
+                        <span class="info-value">{{ result.prediction.category|title }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Confidence:</span>
+                        <div style="flex: 1; max-width: 150px;">
+                            <span class="info-value">{{ (result.prediction.confidence * 100)|round(1) }}%</span>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: {{ result.prediction.confidence * 100 }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Restricted Content:</span>
+                        <span class="info-value">{{ 'Yes' if result.prediction.is_restricted else 'No' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Model Used:</span>
+                        <span class="info-value">{{ result.prediction.model_used|title }}</span>
+                    </div>
+                </div>
+                
+                <!-- Decision Details -->
+                <div class="info-card">
+                    <h3>Verification Decision</h3>
+                    <div class="info-item">
+                        <span class="info-label">Decision:</span>
+                        <span class="info-value">{{ result.decision.decision|replace('_', ' ')|title }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Allowed:</span>
+                        <span class="info-value">{{ 'Yes' if result.decision.is_allowed else 'No' }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Severity:</span>
+                        <span class="severity-indicator severity-{{ result.decision.severity }}">
+                            {{ result.decision.severity|upper }}
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Review Required:</span>
+                        <span class="info-value">{{ 'Yes' if result.decision.requires_review else 'No' }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reason -->
+            <div class="info-card">
+                <h3>Decision Reason</h3>
+                <p style="margin: 0; color: #555; line-height: 1.6;">{{ result.decision.reason }}</p>
+            </div>
+            
+            <!-- Timestamp -->
+            <div style="text-align: center; margin-top: 30px; color: #777;">
+                <p>Verified at: {{ result.timestamp }}</p>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="/verify" class="btn btn-primary">Verify More Content</a>
+                <a href="/dashboard" class="btn btn-secondary">View Dashboard</a>
+                <a href="/" class="btn btn-secondary">Back to Home</a>
             </div>
         </div>
-        <a href="{{ url_for('verify') }}">Back to Verification</a>
     </div>
-    <script src="{{ url_for('static', filename='js/results.js') }}"></script>
 </body>
 </html>
